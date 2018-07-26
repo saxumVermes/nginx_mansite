@@ -7,7 +7,7 @@ import (
 	"os"
 	"strings"
 
-	nginx "../../pkg/nginx"
+	"../../pkg/nginx"
 )
 
 var info = nginx.Info{
