@@ -1,3 +1,4 @@
-BIN := nginx_mansite
+BIN := nginx-man
 
-PKG := github.com/saxumVermes/nginx_mansite
+$(BIN):
+	go build -o $(BIN) cmd/nginx_modsite/main.go
