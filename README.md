@@ -8,5 +8,5 @@ Default paths:
 * /etc/nginx/sites-available
 * /etc/nginx/sites-enabled
 
-Usage: nginx-man <command> <subcommand> <flags>
+Usage: `nginx-man <command> <subcommand> <flags>`  
 Type --help for more information.
