@@ -1,7 +1,5 @@
-BIN := nginx-man
+build:
+	go build -o nginx-man github.com/saxumVermes/nginx_mansite/cmd/nginx-man
 
-$(BIN):
-	go build -o $(BIN) cmd/nginx_modsite/main.go
-
-into_path: $(BIN)
-	sudo mv ./$(BIN) /usr/local/bin/
+install:
+	go install github.com/saxumVermes/nginx_mansite/cmd/nginx-man
