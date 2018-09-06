@@ -43,8 +43,8 @@ func (c *Config) EditConfig(i *Info, name string) {
 
 func (c *Config) CreateConfig(i *Info, name string, templateType string) {
 	temps := make(map[string]*template.Template)
-	temps["default"] = template.Must(template.ParseFiles("../../templates/default.conf"))
-	temps["drupal"] = template.Must(template.ParseFiles("../../templates/drupal.conf"))
+	temps["default"] = template.Must(template.ParseFiles("templates/default.conf"))
+	temps["drupal"] = template.Must(template.ParseFiles("templates/drupal.conf"))
 
 	reader := bufio.NewReader(os.Stdin)
 	fmt.Print("You are about to create a new configuration. Give a port number: ")
