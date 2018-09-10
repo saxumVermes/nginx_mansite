@@ -111,11 +111,11 @@ func main() {
 func help(cmd string) {
 	switch cmd {
 	case "config":
-		fmt.Println("\nUsage: nginx-modsite config <params> <flags>")
+		fmt.Println("\nUsage: nginx-man config <params> <flags>")
 		fmt.Println("\nParams:\n\tcreate\n\tedit\n\tdelete")
 
 	case "default":
-		fmt.Println("\nUsage: nginx-modsite <command> <params> <flags>")
+		fmt.Println("\nUsage: nginx-man <command> <params> <flags>")
 		fmt.Println("\nCommands:\n\tconfig\tcreate, edit, delete configs\n\tsite\tenable or disable sites\n\nType <command> --help for more information.")
 	}
 	os.Exit(2)
