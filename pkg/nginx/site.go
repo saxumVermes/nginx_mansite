@@ -6,16 +6,16 @@ import (
 	"strings"
 )
 
-type Info struct {
-	SitesAvailable     []string
-	SitesEnabled       []string
-	SitesAvailablePath string
-	SitesEnabledPath   string
+type Site struct {
+	Available     []string
+	Enabled       []string
+	AvailablePath string
+	EnabledPath   string
 }
 
-func (i *Info) EnableSite(name string) {
+func (s *Site) Enable(name string) {
 	var site string
-	for _, s := range i.SitesAvailable {
+	for _, s := range s.Available {
 		if s == strings.TrimSpace(name) {
 			site = name
 		}
@@ -25,7 +25,7 @@ func (i *Info) EnableSite(name string) {
 		os.Exit(1)
 	}
 
-	err := os.Symlink(i.SitesAvailablePath+site, i.SitesEnabledPath+site)
+	err := os.Symlink(s.AvailablePath+site, s.EnabledPath+site)
 	if err != nil {
 		fmt.Fprintf(os.Stderr, "Can not create symlink: %v\n", err)
 		os.Exit(1)
@@ -34,9 +34,9 @@ func (i *Info) EnableSite(name string) {
 	fmt.Printf("Site %s is enabled!\n", site)
 }
 
-func (i *Info) DisableSite(name string) {
+func (s *Site) Disable(name string) {
 	var site string
-	for _, s := range i.SitesEnabled {
+	for _, s := range s.Enabled {
 		if s == strings.TrimSpace(name) {
 			site = name
 		}
@@ -45,7 +45,7 @@ func (i *Info) DisableSite(name string) {
 		fmt.Fprintln(os.Stderr, "Site not found!")
 		os.Exit(1)
 	}
-	err := os.Remove(i.SitesEnabledPath + site)
+	err := os.Remove(s.EnabledPath + site)
 	if err != nil {
 		fmt.Fprintf(os.Stderr, "Unable to remove %s: %v\n", site, err)
 		os.Exit(1)
@@ -53,15 +53,15 @@ func (i *Info) DisableSite(name string) {
 	fmt.Println("Site disabled!")
 }
 
-func (i *Info) ListSites(list string) {
+func (s *Site) List(list string) {
 	switch list {
 	case "available":
-		fmt.Printf("\nAvailable sites: %v\n\n", i.SitesAvailable)
+		fmt.Printf("\nAvailable sites: %v\n\n", s.Available)
 	case "enabled":
-		fmt.Printf("\nEnabled sites: %v\n\n", i.SitesEnabled)
+		fmt.Printf("\nEnabled sites: %v\n\n", s.Enabled)
 	case "all":
-		fmt.Printf("\nAvailable sites: %v\n", i.SitesAvailable)
-		fmt.Printf("Enabled sites: %v\n\n", i.SitesEnabled)
+		fmt.Printf("\nAvailable sites: %v\n", s.Available)
+		fmt.Printf("Enabled sites: %v\n\n", s.Enabled)
 	default:
 		fmt.Fprintln(os.Stderr, "Invalid supplient! Valid values are: available|enabled")
 		os.Exit(1)

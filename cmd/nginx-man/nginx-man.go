@@ -10,28 +10,28 @@ import (
 	"github.com/saxumVermes/nginx_mansite/pkg/nginx"
 )
 
-var info = nginx.Info{
-	SitesAvailablePath: "/etc/nginx/sites-available/",
-	SitesEnabledPath:   "/etc/nginx/sites-enabled/",
+var site = nginx.Site{
+	AvailablePath: "/etc/nginx/sites-available/",
+	EnabledPath:   "/etc/nginx/sites-enabled/",
 }
 
 func init() {
-	enabled, err := ioutil.ReadDir(info.SitesEnabledPath)
+	enabled, err := ioutil.ReadDir(site.EnabledPath)
 	if err != nil {
 		fmt.Fprintf(os.Stderr, "%v", err)
 		os.Exit(1)
 	}
 	for _, f := range enabled {
-		info.SitesEnabled = append(info.SitesEnabled, f.Name())
+		site.Enabled = append(site.Enabled, f.Name())
 	}
 
-	available, err := ioutil.ReadDir(info.SitesAvailablePath)
+	available, err := ioutil.ReadDir(site.AvailablePath)
 	if err != nil {
 		fmt.Fprintf(os.Stdout, "%v", err)
 		os.Exit(1)
 	}
 	for _, f := range available {
-		info.SitesAvailable = append(info.SitesAvailable, f.Name())
+		site.Available = append(site.Available, f.Name())
 	}
 }
 
@@ -57,7 +57,7 @@ func main() {
 			configType := configCmd.String("t", "", "Config type: default, drupal")
 			configCmd.Parse(os.Args[3:])
 			if *configName != "" && *configType != "" {
-				c.CreateConfig(&info, *configName, *configType)
+				c.Create(&site, *configName, *configType)
 			} else {
 				configCmd.PrintDefaults()
 			}
@@ -65,7 +65,7 @@ func main() {
 		case "edit":
 			configCmd.Parse(os.Args[3:])
 			if *configName != "" {
-				c.EditConfig(&info, *configName)
+				c.Edit(&site, *configName)
 			} else {
 				configCmd.PrintDefaults()
 			}
@@ -73,7 +73,7 @@ func main() {
 		case "delete":
 			configCmd.Parse(os.Args[3:])
 			if *configName != "" {
-				c.DeleteConfig(&info, *configName)
+				c.Delete(&site, *configName)
 			} else {
 				configCmd.PrintDefaults()
 			}
@@ -92,15 +92,15 @@ func main() {
 		}
 
 		if strings.TrimSpace(*listSiteOf) != "" {
-			info.ListSites(*listSiteOf)
+			site.List(*listSiteOf)
 		}
 
 		if *siteEn != "" {
-			info.EnableSite(*siteEn)
+			site.Enable(*siteEn)
 		}
 
 		if *siteDis != "" {
-			info.DisableSite(*siteDis)
+			site.Disable(*siteDis)
 		}
 
 	default:
