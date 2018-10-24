@@ -7,31 +7,40 @@ import (
 	"os"
 	"strings"
 
-	"github.com/saxumVermes/nginx_mansite/pkg/nginx"
+	"github.com/saxumVermes/nginx_mansite/src/nginx"
 )
 
-var info = nginx.Info{
-	SitesAvailablePath: "/etc/nginx/sites-available/",
-	SitesEnabledPath:   "/etc/nginx/sites-enabled/",
+//AvailablePath points to nginx directory of available sites.
+var AvailablePath = "/etc/nginx/sites-available/"
+
+//EnabledPath points to nginx directory of enabled sites.
+var EnabledPath = "/etc/nginx/sites-enabled/"
+
+//TemplatePath is a runtime variable, contains absolute path to templates.
+var TemplatePath string
+
+var site = nginx.Site{
+	AvailablePath: AvailablePath,
+	EnabledPath:   EnabledPath,
 }
 
 func init() {
-	enabled, err := ioutil.ReadDir(info.SitesEnabledPath)
+	enabled, err := ioutil.ReadDir(site.EnabledPath)
 	if err != nil {
 		fmt.Fprintf(os.Stderr, "%v", err)
 		os.Exit(1)
 	}
 	for _, f := range enabled {
-		info.SitesEnabled = append(info.SitesEnabled, f.Name())
+		site.Enabled = append(site.Enabled, f.Name())
 	}
 
-	available, err := ioutil.ReadDir(info.SitesAvailablePath)
+	available, err := ioutil.ReadDir(site.AvailablePath)
 	if err != nil {
 		fmt.Fprintf(os.Stdout, "%v", err)
 		os.Exit(1)
 	}
 	for _, f := range available {
-		info.SitesAvailable = append(info.SitesAvailable, f.Name())
+		site.Available = append(site.Available, f.Name())
 	}
 }
 
@@ -46,6 +55,7 @@ func main() {
 	switch os.Args[1] {
 	case "config":
 		c := nginx.Config{}
+		c.TemplatePath = TemplatePath
 		configName := configCmd.String("n", "", "Config name")
 
 		if len(os.Args) < 3 {
@@ -57,7 +67,7 @@ func main() {
 			configType := configCmd.String("t", "", "Config type: default, drupal")
 			configCmd.Parse(os.Args[3:])
 			if *configName != "" && *configType != "" {
-				c.CreateConfig(&info, *configName, *configType)
+				c.Create(&site, *configName, *configType)
 			} else {
 				configCmd.PrintDefaults()
 			}
@@ -65,42 +75,45 @@ func main() {
 		case "edit":
 			configCmd.Parse(os.Args[3:])
 			if *configName != "" {
-				c.EditConfig(&info, *configName)
+				c.Edit(&site, *configName)
 			} else {
 				configCmd.PrintDefaults()
 			}
 
 		case "delete":
-			configCmd.Parse(os.Args[3:])
-			if *configName != "" {
-				c.DeleteConfig(&info, *configName)
+			configs := os.Args[3:]
+			if len(configs) > 1 {
+				for _, conf := range configs {
+					c.Delete(&site, conf)
+				}
 			} else {
-				configCmd.PrintDefaults()
+				fmt.Fprintln(os.Stderr, "Invalid arguments. List configs separated by space.")
+				os.Exit(1)
 			}
 		default:
 			help("config")
 		}
 
 	case "site":
-		siteEn := siteCmd.String("e", "", "Enable site")
-		siteDis := siteCmd.String("d", "", "Disable site")
-		listSiteOf := siteCmd.String("l", "", "List sites: avaliable|enabled")
+		en := siteCmd.String("e", "", "Enable site")
+		dis := siteCmd.String("d", "", "Disable site")
+		list := siteCmd.String("l", "", "List sites: avaliable|enabled")
 		siteCmd.Parse(os.Args[2:])
 
 		if len(os.Args) < 3 {
 			siteCmd.PrintDefaults()
 		}
 
-		if strings.TrimSpace(*listSiteOf) != "" {
-			info.ListSites(*listSiteOf)
+		if strings.TrimSpace(*list) != "" {
+			site.List(*list)
 		}
 
-		if *siteEn != "" {
-			info.EnableSite(*siteEn)
+		if *en != "" {
+			site.Enable(*en)
 		}
 
-		if *siteDis != "" {
-			info.DisableSite(*siteDis)
+		if *dis != "" {
+			site.Disable(*dis)
 		}
 
 	default:
