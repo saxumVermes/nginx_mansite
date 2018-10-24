@@ -7,12 +7,21 @@ import (
 	"os"
 	"strings"
 
-	"github.com/saxumVermes/nginx_mansite/pkg/nginx"
+	"github.com/saxumVermes/nginx_mansite/src/nginx"
 )
 
+//AvailablePath points to nginx directory of available sites.
+var AvailablePath = "/etc/nginx/sites-available/"
+
+//EnabledPath points to nginx directory of enabled sites.
+var EnabledPath = "/etc/nginx/sites-enabled/"
+
+//TemplatePath is a runtime variable, contains absolute path to templates.
+var TemplatePath string
+
 var site = nginx.Site{
-	AvailablePath: "/etc/nginx/sites-available/",
-	EnabledPath:   "/etc/nginx/sites-enabled/",
+	AvailablePath: AvailablePath,
+	EnabledPath:   EnabledPath,
 }
 
 func init() {
@@ -46,6 +55,7 @@ func main() {
 	switch os.Args[1] {
 	case "config":
 		c := nginx.Config{}
+		c.TemplatePath = TemplatePath
 		configName := configCmd.String("n", "", "Config name")
 
 		if len(os.Args) < 3 {
@@ -71,36 +81,39 @@ func main() {
 			}
 
 		case "delete":
-			configCmd.Parse(os.Args[3:])
-			if *configName != "" {
-				c.Delete(&site, *configName)
+			configs := os.Args[3:]
+			if len(configs) > 1 {
+				for _, conf := range configs {
+					c.Delete(&site, conf)
+				}
 			} else {
-				configCmd.PrintDefaults()
+				fmt.Fprintln(os.Stderr, "Invalid arguments. List configs separated by space.")
+				os.Exit(1)
 			}
 		default:
 			help("config")
 		}
 
 	case "site":
-		siteEn := siteCmd.String("e", "", "Enable site")
-		siteDis := siteCmd.String("d", "", "Disable site")
-		listSiteOf := siteCmd.String("l", "", "List sites: avaliable|enabled")
+		en := siteCmd.String("e", "", "Enable site")
+		dis := siteCmd.String("d", "", "Disable site")
+		list := siteCmd.String("l", "", "List sites: avaliable|enabled")
 		siteCmd.Parse(os.Args[2:])
 
 		if len(os.Args) < 3 {
 			siteCmd.PrintDefaults()
 		}
 
-		if strings.TrimSpace(*listSiteOf) != "" {
-			site.List(*listSiteOf)
+		if strings.TrimSpace(*list) != "" {
+			site.List(*list)
 		}
 
-		if *siteEn != "" {
-			site.Enable(*siteEn)
+		if *en != "" {
+			site.Enable(*en)
 		}
 
-		if *siteDis != "" {
-			site.Disable(*siteDis)
+		if *dis != "" {
+			site.Disable(*dis)
 		}
 
 	default:

@@ -6,6 +6,7 @@ import (
 	"strings"
 )
 
+//Site contains information about sites-available and sites-enabled paths.
 type Site struct {
 	Available     []string
 	Enabled       []string
@@ -13,6 +14,7 @@ type Site struct {
 	EnabledPath   string
 }
 
+//Enable symlinks a config from site-available to sites-enabled.
 func (s *Site) Enable(name string) {
 	var site string
 	for _, s := range s.Available {
@@ -34,6 +36,7 @@ func (s *Site) Enable(name string) {
 	fmt.Printf("Site %s is enabled!\n", site)
 }
 
+//Disable removes symlink from site-enabled.
 func (s *Site) Disable(name string) {
 	var site string
 	for _, s := range s.Enabled {
@@ -53,6 +56,7 @@ func (s *Site) Disable(name string) {
 	fmt.Println("Site disabled!")
 }
 
+//List prints out sites to stdout based on the privided flag values.
 func (s *Site) List(list string) {
 	switch list {
 	case "available":
